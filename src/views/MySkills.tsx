@@ -25,6 +25,7 @@ import {
   Share2,
   Tag,
   Trash2,
+  ArrowDownAZ,
 } from "lucide-react";
 import { open as dialogOpen } from "@tauri-apps/plugin-dialog";
 import { useNavigate } from "react-router-dom";
@@ -44,6 +45,7 @@ import { ToggleSwitch } from "../components/ToggleSwitch";
 import { CardActionMenu } from "../components/CardActionMenu";
 import * as api from "../lib/tauri";
 import { getTagActiveColor, getTagColor, pruneStaleTagFilters, UNTAGGED_FILTER } from "../lib/skillTags";
+import { sortSkillsByName } from "../lib/skillSort";
 import type {
   ManagedSkill,
   ToolInfo,
@@ -148,6 +150,8 @@ export function MySkills() {
     closeSkillDetail,
     projects,
     refreshProjects,
+    sortByName,
+    toggleSortByName,
   } = useApp();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filterMode, setFilterMode] = useState<"all" | "enabled" | "available">("all");
@@ -308,6 +312,12 @@ export function MySkills() {
       return true;
     });
 
+    // "Sort A–Z": ignore preset enabled-first grouping and custom drag order,
+    // and show a pure dictionary-order list instead.
+    if (sortByName) {
+      return sortSkillsByName(result, (s) => skillDisplayNames.get(s.id) || s.name);
+    }
+
     // Always sort enabled skills first; within enabled group, use custom sort order
     if (viewedPreset) {
       result.sort((a, b) => {
@@ -325,7 +335,7 @@ export function MySkills() {
     }
 
     return result;
-  }, [skills, skillDisplayNames, search, sourceFilters, tagFilters, filterMode, viewedPreset, presetSkillOrder]);
+  }, [skills, skillDisplayNames, search, sourceFilters, tagFilters, filterMode, viewedPreset, presetSkillOrder, sortByName]);
 
   const {
     isMultiSelect, setIsMultiSelect,
@@ -388,7 +398,7 @@ export function MySkills() {
     [filtered, viewedPreset]
   );
 
-  const canDrag = !!viewedPreset;
+  const canDrag = !!viewedPreset && !sortByName;
 
   const refreshGitStatus = useCallback(async () => {
     try {
@@ -1197,6 +1207,17 @@ export function MySkills() {
               )}
             >
               <LayoutGrid className="h-4 w-4" />
+            </button>
+            <button
+              onClick={toggleSortByName}
+              className={cn(
+                "rounded-md p-2 transition-colors outline-none",
+                sortByName ? "bg-surface-active text-secondary" : "text-muted hover:text-tertiary"
+              )}
+              title={t("mySkills.sortByName")}
+              aria-pressed={sortByName}
+            >
+              <ArrowDownAZ className="h-4 w-4" />
             </button>
             <button
               onClick={() => setViewMode("list")}
