@@ -38,6 +38,7 @@ import { TagRenameDialog } from "../components/TagRenameDialog";
 import { SkillDetailPanel } from "../components/SkillDetailPanel";
 import { MultiSelectToolbar } from "../components/MultiSelectToolbar";
 import { BatchTagDialog } from "../components/BatchTagDialog";
+import { SkillSortButton } from "../components/SkillSortButton";
 import { BatchSyncAgentDialog } from "../components/BatchSyncAgentDialog";
 import { SyncDots } from "../components/SyncDots";
 import { ToggleSwitch } from "../components/ToggleSwitch";
@@ -150,7 +151,6 @@ export function MySkills() {
     projects,
     refreshProjects,
     skillSortMode,
-    setSkillSortMode,
   } = useApp();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [filterMode, setFilterMode] = useState<"all" | "enabled" | "available">("all");
@@ -1161,25 +1161,6 @@ export function MySkills() {
             ))}
           </div>
 
-          <div className="app-segmented">
-            {([
-              ["none", t("mySkills.sortDefault")],
-              ["asc", t("mySkills.sortAsc")],
-              ["desc", t("mySkills.sortDesc")],
-            ] as const).map(([mode, label]) => (
-              <button
-                key={mode}
-                onClick={() => setSkillSortMode(mode)}
-                className={cn(
-                  "app-segmented-button",
-                  skillSortMode === mode && "app-segmented-button-active"
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
         </div>
 
         {/* Keep all library actions in one toolbar so they wrap together. */}
@@ -1230,6 +1211,7 @@ export function MySkills() {
             >
               <LayoutGrid className="h-4 w-4" />
             </button>
+            <SkillSortButton />
             <button
               onClick={() => setViewMode("list")}
               className={cn(
